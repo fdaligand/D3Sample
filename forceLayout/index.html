@@ -86,10 +86,42 @@
 							"text-anchor":"middle",
 						});
 
+		// Draw Scatterplot 
 
+		var scatData = []
+		for (var i = 0; i<15;i++) {
+			var tempArray = []
+			tempArray.push( Math.floor(Math.random()*(w-11)+10)); // avoid demi circle in graph
+			tempArray.push( Math.floor(Math.random()*(h-11)+10)); // idem 
+			scatData.push(tempArray);
+		}
 
+		var svgScat = d3.select("body")
+						.append("svg")
+						.attr({
+								width: w,
+								height: h,
+						});
+		svgScat.selectAll("circle")
+				.data(scatData)
+				.enter().append("circle")
+					.attr({
+							cx: function(d){ return d[0]},
+							cy: function(d) {return h - d[1]},
+							r: function(d){ return Math.sqrt(h - d[1]);},
+					});
 
-		
+		svgScat.selectAll("text")
+				.data(scatData)
+				.enter().append("text")
+					.text(function(d){ return d ;})
+					.attr({
+							x: function(d) { return d[0];},
+							y: function(d) { return d[1];},
+							"font-family":"sans-serif",
+							"font-size":"11px",
+							"fill":"green",
+					});
         </script>
     </body>
 </html>
