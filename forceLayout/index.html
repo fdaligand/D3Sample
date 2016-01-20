@@ -18,14 +18,20 @@
     <body>
         <script type="text/javascript">
 		
-		var dataset = [5,10,15,20,25]
+		var dataset = [];
+		for (var i = 0 ; i < 25; i++){
 
+			var newNb = Math.floor(Math.random() * 30); // rounds down random number, use Math.round() for nearest integer round
+			dataset.push(newNb);
+		}
 
+		//print dataset text
 		d3.selectAll("p")
 			.data(dataset)
 			.enter().append("p")
 			.text(function(d){return d;})
 
+		// Draw static chart with div element
 		d3.select("body").selectAll("div")
 			.data(dataset)
 			.enter()
@@ -35,6 +41,27 @@
 				var barHeight = 5 * d ;
 				return barHeight+"px"
 				})
+
+		// Draw SVG chart 
+		var svg = d3.select("body")
+					.append("svg")
+						.attr("height",100)
+						.attr("width",800);
+		svg.selectAll("circle")
+			.data(dataset)
+			.enter().append("circle")
+				.attr("cx",function(d,i){ return i*50 + 25;})
+				.attr("cy",50)
+				.attr("r",function(d){return d})
+				.attr("fill","yellow")
+				.attr("stroke","orange")
+				.attr("stroke-width", function(d) { return d/2})
+
+
+
+
+
+		
         </script>
     </body>
 </html>
