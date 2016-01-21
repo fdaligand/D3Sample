@@ -91,10 +91,23 @@
 		var scatData = []
 		for (var i = 0; i<15;i++) {
 			var tempArray = []
-			tempArray.push( Math.floor(Math.random()*(w-11)+10)); // avoid demi circle in graph
-			tempArray.push( Math.floor(Math.random()*(h-11)+10)); // idem 
+			tempArray.push( Math.floor(Math.random()*w)); // avoid demi circle in graph
+			tempArray.push( Math.floor(Math.random()*h)); // idem 
 			scatData.push(tempArray);
 		}
+
+		// create a scale 
+		var padding = 20
+		var xScale = d3.scale.linear()
+						.domain([0,d3.max(scatData,function(d){ return d[0];})])
+						.range([padding,w-padding]);
+		var yScale = d3.scale.linear()
+						.domain([0,d3.max(scatData,function(d){ return d[1];})])
+						.range([padding,h - padding]);
+
+		var rScale = d3.scale.linear()
+						.domain([0,d3.max(scatData,function(d){return d[1];})])
+						.range([1,5])
 
 		var svgScat = d3.select("body")
 						.append("svg")
@@ -106,22 +119,23 @@
 				.data(scatData)
 				.enter().append("circle")
 					.attr({
-							cx: function(d){ return d[0]},
-							cy: function(d) {return h - d[1]},
-							r: function(d){ return Math.sqrt(h - d[1]);},
+							cx: function(d){ return xScale(d[0])},
+							cy: function(d) {return yScale(d[1])},
+							r: function(d){ return rScale(d[1]);},
 					});
 
 		svgScat.selectAll("text")
 				.data(scatData)
 				.enter().append("text")
-					.text(function(d){ return d ;})
+					.text(function(d){ return d[1] ;})
 					.attr({
-							x: function(d) { return d[0];},
-							y: function(d) { return d[1];},
+							x: function(d) { return xScale(d[0]);},
+							y: function(d) { return yScale(d[1]);},
 							"font-family":"sans-serif",
 							"font-size":"11px",
 							"fill":"green",
 					});
+		
         </script>
     </body>
 </html>
