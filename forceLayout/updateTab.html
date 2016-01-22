@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <style>
+        	div.bar {
+        		display: inline-block;
+        		width: 20px;
+        		height: 20px;
+        		background-color: teal;
+        		margin-right: 2px;
+
+        	}
+        	.axis path,
+        	.axis line {
+        		fill: none;
+        		stroke: black;
+        		shape-rendering: crispEdges;
+        	}
+
+        	.axis text {
+        		font-family: sans-serif;
+        		font-size: 11px;
+        	}
+        </style>
+        <title>D3 Page Template</title>
+        <script type="text/javascript" src="D3/d3.js"></script>
+    </head>
+    <body> 
+    	<p> Update with new value </p> 
+        <script type="text/javascript">
+		// chapter 9 : Update , Transition and Motions 
+
+		var upDataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+                11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
+        var w = 600;
+        var h = 250;
+
+        var xScale = d3.scale.ordinal()
+        					.domain(d3.range(upDataset.length)) //d3.range(n) => return array of n items [0,...,n-1]
+        					.rangeRoundBands([ 0, w],0.05)
+        var yScale = d3.scale.linear()
+        						.domain([0,d3.max(upDataset)])
+        						.range([0,h])
+
+
+        //Create svg element 
+        var upSvg = d3.select("body")
+        				.append("svg")
+        				.attr({ width: w, height: h });
+
+        //Create bars
+
+        upSvg.selectAll("rect")
+        		.data(upDataset)
+        		.enter().append("rect")
+        		.attr({ x: function(d,i) {return xScale(i);},
+        				y: function(d){return h - yScale(d);},
+        				width: function(){ return xScale.rangeBand();},
+        				height: function(d) {return yScale(d);},
+        				fill: function(d){ return "rgb(0,"+(d*10)+",0)";},
+        				});
+		//Create label 
+
+		upSvg.selectAll("text")
+				.data(upDataset)
+				.enter().append("text")
+				.text(function(d){return d;})
+				.attr({ x: function(d,i){ return xScale(i) + xScale.rangeBand() / 2;},
+						y: function(d){ return h-yScale(d) +14;},
+						"font-family": "sans-serif",
+						"font-size": "11px",
+						"fill":"black",
+						"text-anchor":"middle"
+			})
+		//On click, update with new data			
+			d3.select("p")
+				.on("click", function() {
+
+					//New values for dataset
+					dataset = [ 11, 12, 15, 20, 18, 17, 16, 18, 23, 25,
+								5, 10, 13, 19, 21, 25, 22, 18, 15, 13 ];
+
+					//Update all rects
+					upSvg.selectAll("rect")
+					   .data(dataset)
+					   .attr( { y: function(d) {return h - yScale(d);},
+					   			height: function(d) { return yScale(d);},
+					   			fill: function(d) { return "rgb(0,"+(d*10)+",0)";},
+					   		});
+
+					//Update all labels
+					upSvg.selectAll("text")
+					   .data(dataset)
+					   .text(function(d) {
+					   		return d;
+					   })
+					   .attr({x: function(d, i) {
+					   		return xScale(i) + xScale.rangeBand() / 2;
+					   },
+					   		y: function(d) {
+					   		return h - yScale(d) + 14;
+					   },});
+					   				
+				});
+
+
+        </script>
+    </body>
+</html>
+
