@@ -78,20 +78,38 @@
 				.on("click", function() {
 
 					//New values for dataset
-					dataset = [ 11, 12, 15, 20, 18, 17, 16, 18, 23, 25,
-								5, 10, 13, 19, 21, 25, 22, 18, 15, 13 ];
+					var numValues = upDataset.length;
+					dataset = [];
+					for(var i = 0 ;i < numValues; i++ ) {
+
+						dataset.push(Math.floor(Math.random() * 100));
+					}
+
+					//update y scale according to new data
+					yScale.domain([0,d3.max(dataset)]);
 
 					//Update all rects
 					upSvg.selectAll("rect")
 					   .data(dataset)
+					   .transition()
+        			   .delay( function(d,i) { return i*100 })
+        			   .duration(2000)
+        			   .ease("elastic")
 					   .attr( { y: function(d) {return h - yScale(d);},
 					   			height: function(d) { return yScale(d);},
 					   			fill: function(d) { return "rgb(0,"+(d*10)+",0)";},
 					   		});
+					   
+        			   
+        			   
+					   
 
 					//Update all labels
 					upSvg.selectAll("text")
 					   .data(dataset)
+					   .transition()
+					   .duration(2000)
+					   .ease("elastic") // way that transition is applied
 					   .text(function(d) {
 					   		return d;
 					   })
@@ -101,6 +119,19 @@
 					   		y: function(d) {
 					   		return h - yScale(d) + 14;
 					   },});
+					// manage event on bar chart 
+					upSvg.selectAll("rect")
+					 	.on("mouseover",function(){
+
+					   		d3.select(this)
+					   			.attr("fill","rgb(0,150,200)");
+					   })
+					   .on("mouseout",function(d){
+					   		d3.select(this)
+					   			.transition()
+					   			.duration(500)
+					   			.attr("fill","rgb(0,"+(d*10)+",0)")
+					   });
 					   				
 				});
 
