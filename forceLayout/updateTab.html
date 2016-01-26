@@ -27,7 +27,7 @@
         <script type="text/javascript" src="D3/d3.js"></script>
     </head>
     <body> 
-    	<p> Update with new value </p> 
+    	<p> Update with new value </p>
         <script type="text/javascript">
 		// chapter 9 : Update , Transition and Motions 
 
@@ -134,7 +134,19 @@
 					   });
 					   				
 				});
+		//Sort bars
+		d3.selectAll("rect")
+			.on("click", function() {
 
+				upSvg.selectAll("rect")
+					.sort( function(a,b) {
+								return d3.ascending(a,b);
+					})
+					.transition()
+					.duration(1000)
+					.attr("x",function(d,i){ return xScale(i);})
+
+			});
 
         </script>
     </body>
