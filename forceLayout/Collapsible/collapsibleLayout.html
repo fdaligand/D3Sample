@@ -3,123 +3,179 @@
 	<head>
 		<meta charset="utf-8">
 		<title>D3: Force layout</title>
-		<script type="text/javascript" src="D3/d3.js"></script>
-		<style type="text/css">
-			/* No style rules here yet */
-		</style>
+		<script type="text/javascript" src="../D3/d3.js"></script>
+		<style>
+
+.node {
+  cursor: pointer;
+}
+.node circle {
+  stroke: #3182bd;
+  stroke-width: 1.5px;
+}
+.node text {
+	color:"red";
+}
+
+.link {
+  fill: none;
+  stroke: #9ecae1;
+  stroke-width: 1.5px;
+}
+
+</style>
 	</head>
 	<body>
 
 		<script type="text/javascript">
 
-			//Width and height
-			var w = 800;
-			var h = 800;
+	var width = 960,
+    height = 800,
+    root;
 
-			
-			//create SVG elemeent in page 
-			var svg = d3.select("body")
-							.append("svg")
-							.attr({ 
-									"width": w,
-									"height":h,
-							 })
+var force = d3.layout.force()
+    .size([width, height])
+    .on("tick", tick); //call tick function on each tick 
 
-			//create force layout 
-			var force = d3.layout.force()
-									.gravity(.05) // set the gravity to the center of the layout 
-									.distance(50)
-									.charge(-50) // neagtive value results in node repulsion, positive value in node attraction
-									.size([w,h])
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
 
+var link = svg.selectAll(".link"),
+    node = svg.selectAll(".node");
 
-			//Original data
-			var dataset = {
-				nodes: [
-					{ name: "Tools 1",},
-					{ name: "Tools 2",},
-					{ name: "Tools 3",},
-					{ name: "Tools 4",},
-					{ name: "Tools 5",},
-					{ name: "Tools 6",},
-					{ name: "Tools 7",},
-					{ name: "Tools 8",},
-					{ name: "Tools 9",},
-					{ name: "Tools 10",},
+d3.json("jira.json", function(error, json) {
+  if (error) throw error;
 
-					
-				],
-				edges: [
-					{ source: 0, target: 1 ,  main: 0},
-					{ source: 0, target: 2 ,  main: 0},
-					{ source: 0, target: 3 ,  main: 0},
-					{ source: 0, target: 4 ,  main: 1},
-					{ source: 0, target: 7 ,  main: 1},
-					{ source: 4, target: 5 ,  main: 0},
-					{ source: 4, target: 6 ,  main: 0},
-					{ source: 4, target: 7 ,  main: 1},
-					{ source: 7, target: 8 ,  main: 0},
-					{ source: 7, target: 9 ,  main: 0},
-				]
-			};
+  root = json;
+  update();
+});
 
-			//Initialize a default force layout, using the nodes and edges in dataset
-			var force = d3.layout.force()
-								 .nodes(dataset.nodes)
-								 .links(dataset.edges)
-								 .size([w, h])
-								 .linkDistance( function(d,i) {
-								 						 if(d.main == 1) { 
-								 						 	dist = 200; 
-								 						 } 
-								 						 else {
-								 						 	dist = 50;
-								 						 } 
-								 						 return dist;})
-								 .charge([-100])
-								 .start();
+function update() {
+  var nodes = flatten(root),// return an array of all nodes with their children but flattened 
+      links = d3.layout.tree().links(nodes);
 
-			var colors = d3.scale.category10();
+  // Restart the force layout.
+  force
+      .nodes(nodes)
+      .links(links)
+      .linkDistance(computeDist)
+      .charge([-500])
+      .start();
 
-			//Create SVG element
-			var svg = d3.select("body")
-						.append("svg")
-						.attr("width", w)
-						.attr("height", h);
-			
-			//Create edges as lines
-			var edges = svg.selectAll("line")
-				.data(dataset.edges)
-				.enter()
-				.append("line")
-				.style("stroke", "#ccc")
-				.style("stroke-width", 1);
-			
-			//Create nodes as circles
-			var nodes = svg.selectAll("circle")
-				.data(dataset.nodes)
-				.enter()
-				.append("circle")
-				.attr("r", 10)
-				.style("fill", function(d, i) {
-					return colors(i);
-				})
-				.call(force.drag);
-			
-			//Every time the simulation "ticks", this will be called
-			force.on("tick", function() {
+  // Update the links…
+  link = link.data(links, function(d) { return d.target.id; });
 
-				edges.attr("x1", function(d) { return d.source.x; })
-					 .attr("y1", function(d) { return d.source.y; })
-					 .attr("x2", function(d) { return d.target.x; })
-					 .attr("y2", function(d) { return d.target.y; });
-			
-				nodes.attr("cx", function(d) { return d.x; })
-					 .attr("cy", function(d) { return d.y; });
-	
-			});
+  // Exit any old links.
+  link.exit().remove();
 
+  // Enter any new links.
+  link.enter().insert("line", ".node")
+      .attr("class", "link")
+      .attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; });
 
+  // Update the nodes…
+  node = node.data(nodes, function(d) { return d.id; }).style("fill", color);
+
+  // Exit any old nodes.
+  node.exit().remove();
+
+  // Enter any new nodes with a g element
+  node.enter().append("g")
+      .attr("class", "node")
+      .on("click", click)
+      .call(force.drag);
+
+  // Add circle to g ellement 
+  node.append("circle")
+      .attr("class", "node")
+      .attr("cx", 0)//function(d) { return d.x; })
+      .attr("cy", 0)//function(d) { return d.y; })
+      .attr("r", computeR )
+      .style("fill", color);
+  
+  // Add text into circle 
+  node.append("text")
+  		.attr( {"dx": -20,
+  				"dy":6,
+  				"font-size": "11px",
+  				"fill":"red"
+  		})
+  		.text(function(d) { return d.name;});
+      
+}
+
+function tick() {
+  link.attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; });
+
+  node.attr("transform", function (d) { return "translate("+d.x+","+d.y+")";})
+}
+
+// Color leaf nodes orange, and packages white or blue.
+function color(d) {
+  return d._children ? "#3182bd" : d.children ? "#c6dbef" : "#fd8d3c";
+}
+
+// Toggle children on click.
+function click(d) {
+  if (!d3.event.defaultPrevented) {
+    if (d.children) {
+      d._children = d.children;
+      d.children = null;
+    } else {
+      d.children = d._children;
+      d._children = null;
+    }
+    update();
+  }
+}
+// compute distance between nodes according to he type (order) of node
+function computeDist(d) {
+	var dist = 0;
+	if ((d.source.order == "master") && (d.target.order = "task") ) {
+		dist = 300;
+	} else if ( (d.source.order == "task") && (d.target.order == "sub-task") ) {
+		dist = 100
+	} else { 
+		dist = 75;
+	}
+
+	return dist 
+}
+// compute the rayon (!?) of each circle 
+function computeR(d) {
+
+	var r=0;
+	if (d.order == "master") {
+		r = 100;
+	} else if (d.order == "task") {
+		r = 50;	
+	} else {
+		r = 25;
+	}
+
+	return r;
+
+}
+// Returns a list of all nodes under the root.
+function flatten(root) {
+  var nodes = [], i = 0;
+
+  function recurse(node) {
+    if (node.children) node.children.forEach(recurse); //forEach call function on each item of the array 
+    if (!node.id) node.id = ++i;
+    nodes.push(node);
+  }
+
+  recurse(root);
+  return nodes;
+}
 		</script>
 	</body>
 </html>

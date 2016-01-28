@@ -1,0 +1,36 @@
+{
+ "name": "MainJira",
+ "children": [
+  {
+    "name": "Tools 1",
+    "children": [
+        {"name": "Tools 2","size": 10000, "order":"sub-task"},
+        {"name": "Tools 3","size": 10000, "order":"sub-task"},
+        {"name": "Tools 4","size": 10000 ,"order":"sub-task"}
+        ],
+    "size": 50000,
+    "order" : "task"
+    },
+    {
+      "name": "Tools 5",
+      "children": [
+          {"name": "Tools 6","size": 10000, "order":"sub-task"},
+          {"name": "Tools 7","size": 10000, "order":"sub-task"}
+          ],
+      "size": 50000,
+      "order" : "task"
+    },
+    {
+      "name": "Tools 8",
+      "children": [
+          {"name": "Tools 9","size": 10000, "order":"sub-task"},
+          {"name": "Tools 10","size": 10000, "order":"sub-task"}
+          ],
+    "size": 50000,
+    "order" : "task"
+    }
+  ],
+"size" : 100000,
+"order" : "master"
+}
+    
