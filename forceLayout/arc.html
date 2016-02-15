@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <style>
+
+        </style>
+        <title>D3 Page Template</title>
+        <script type="text/javascript" src="D3/d3.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+		var skill = d3.select("body")
+						.append("svg")
+						.attr({
+								"width":"100px",
+								"height":"100px",
+						}).append("g")
+							.attr("transform","translate(50,50)");
+		
+		var arc = d3.svg.arc()
+							.innerRadius(46)
+							.outerRadius(50)
+							.startAngle(0)
+							.endAngle(2*Math.PI);
+							
+
+				skill.append("path")
+						.attr("class","arc")
+						.attr("d",arc);
+		var techno = d3.selectAll("g")
+						.append("text")
+						.attr({
+							"x":-10,
+							"y":40,
+							"text-anchor":"start",
+							"font-size":"10px",
+							"fill":"black"
+						})
+						.text("80%");
+
+		var img = d3.select("svg").append("image")
+						.attr({
+							"xlink:href":"http://www.iconarchive.com/download/i73027/cornmanthe3rd/plex/Other-python.ico",
+							"x":10,
+							"y":0,
+							"width":80,
+							"height":80,
+						});
+        </script>
+    </body>
+</html>
+
